@@ -11,27 +11,25 @@ interface ProductFormProps {
   onComplete: () => void;
 }
 
-// Define an interface for the form's state shape
 interface IFormData {
   name: string;
   description: string;
   price: number;
   sku: string;
   stockQuantity: number;
-  images: string[]; // Explicitly type images as an array of strings
+  images: string[];
   category: string;
   subCategorySlug: string;
 }
 
-// Initial state for a blank form
-const initialState = {
+const initialState: IFormData = {
   name: "",
   description: "",
   price: 0,
   sku: "",
   stockQuantity: 0,
   images: [],
-  category: "", // This will be the category ID
+  category: "",
   subCategorySlug: "",
 };
 
@@ -40,17 +38,18 @@ export default function ProductForm({
   onComplete,
 }: ProductFormProps) {
   const [formData, setFormData] = useState<IFormData>(initialState);
-
   const { categories, fetchCategories } = useCategoryStore();
   const { addProduct, updateProduct } = useProductStore();
   const { token: authToken } = useAuthStore();
 
-  // Fetch categories on component mount
+  // This is the corrected useEffect block
   useEffect(() => {
-    fetchCategories();
-  }, [fetchCategories]);
+    // Only fetch categories if the authToken is available
+    if (authToken) {
+      fetchCategories(authToken);
+    }
+  }, [authToken, fetchCategories]);
 
-  // Populate form if we are editing
   useEffect(() => {
     if (productToEdit) {
       setFormData({
@@ -74,7 +73,11 @@ export default function ProductForm({
     >
   ) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const processedValue =
+      name === "price" || name === "stockQuantity"
+        ? parseFloat(value) || 0
+        : value;
+    setFormData((prev) => ({ ...prev, [name]: processedValue }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -142,6 +145,7 @@ export default function ProductForm({
           </label>
           <input
             type="number"
+            step="0.01"
             name="price"
             value={formData.price}
             onChange={handleChange}
