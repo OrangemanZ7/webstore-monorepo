@@ -14,6 +14,7 @@ export default function ProductsPage() {
   const [view, setView] = useState<"list" | "form">("list");
   const [editingProduct, setEditingProduct] = useState<IProduct | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { products, fetchProducts, deleteProduct } = useProductStore();
   const authToken = useAuthStore((state) => state.token);
@@ -24,13 +25,29 @@ export default function ProductsPage() {
     }
   }, [authToken, fetchProducts]);
 
+  const filteredProducts = useMemo(() => {
+    if (!searchTerm) return products;
+
+    const term = searchTerm.toLowerCase();
+
+    return products.filter((product) => {
+      const nameMatch = product.name.toLowerCase().includes(term);
+      const skuMatch = product.sku.toLowerCase().includes(term);
+      return nameMatch || skuMatch;
+    });
+  }, [products, searchTerm]);
+
   const paginatedProducts = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    return products.slice(startIndex, endIndex);
-  }, [products, currentPage]);
+    return filteredProducts.slice(startIndex, endIndex);
+  }, [filteredProducts, currentPage]);
 
-  const totalPages = Math.ceil(products.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this product?")) {
@@ -90,16 +107,30 @@ export default function ProductsPage() {
 
       {view === "list" && (
         <div className="p-6 bg-white rounded-lg shadow-md">
-          <div className="space-y-4">
-            {paginatedProducts.map((product) => (
-              <ProductListItem
-                key={product._id}
-                product={product}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search products..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md"
+            />
           </div>
+          <div className="space-y-4">
+            {paginatedProducts.length > 0 ? (
+              paginatedProducts.map((product) => (
+                <ProductListItem
+                  key={product._id}
+                  product={product}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))
+            ) : (
+              <p className="text-gray-500">No products found.</p>
+            )}
+          </div>
+
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

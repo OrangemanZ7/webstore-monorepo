@@ -14,7 +14,7 @@ export default function CategoryListItem({
   onDelete,
 }: CategoryListItemProps) {
   return (
-    <div className="p-4 border rounded-md flex justify-between items-center">
+    <div className="p-4 border rounded-md flex justify-between items-start">
       <div>
         <h3 className="font-bold">{category.name}</h3>
         <ul className="pl-4 mt-2 list-disc">
@@ -25,7 +25,7 @@ export default function CategoryListItem({
           ))}
         </ul>
       </div>
-      <div className="space-x-2">
+      <div className="space-x-2 flex-shrink-0 ml-4">
         <button
           onClick={() => onEdit(category)}
           className="px-3 py-1 text-sm text-white bg-blue-500 rounded"

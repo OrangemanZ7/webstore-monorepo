@@ -11,12 +11,12 @@ import CategoryListItem from "@/components/CategoryListItem";
 const ITEMS_PER_PAGE = 5;
 
 export default function CategoriesPage() {
-  // 1. State to manage the current view ('list' or 'form')
   const [view, setView] = useState<"list" | "form">("list");
   const [editingCategory, setEditingCategory] = useState<ICategory | null>(
     null
   );
   const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const { categories, fetchCategories, deleteCategory } = useCategoryStore();
   const authToken = useAuthStore((state) => state.token);
@@ -27,13 +27,31 @@ export default function CategoriesPage() {
     }
   }, [authToken, fetchCategories]);
 
+  const filteredCategories = useMemo(() => {
+    if (!searchTerm) return categories;
+
+    const term = searchTerm.toLowerCase();
+
+    return categories.filter((category) => {
+      const nameMatch = category.name.toLowerCase().includes(term);
+      const subCategoryMatch = category.subCategories.some((sub) =>
+        sub.name.toLowerCase().includes(term)
+      );
+      return nameMatch || subCategoryMatch;
+    });
+  }, [categories, searchTerm]);
+
   const paginatedCategories = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
     const endIndex = startIndex + ITEMS_PER_PAGE;
-    return categories.slice(startIndex, endIndex);
-  }, [categories, currentPage]);
+    return filteredCategories.slice(startIndex, endIndex);
+  }, [filteredCategories, currentPage]);
 
-  const totalPages = Math.ceil(categories.length / ITEMS_PER_PAGE);
+  const totalPages = Math.ceil(filteredCategories.length / ITEMS_PER_PAGE);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
@@ -42,27 +60,23 @@ export default function CategoriesPage() {
     }
   };
 
-  // When the form is submitted or cancelled, return to the list view
   const handleFormComplete = () => {
     setEditingCategory(null);
     setView("list");
   };
 
-  // Handler for the "Edit" button
   const handleEdit = (category: ICategory) => {
     setEditingCategory(category);
     setView("form");
   };
 
-  // Handler for the "Add New" button
   const handleAddNew = () => {
-    setEditingCategory(null); // Ensure we're not editing
+    setEditingCategory(null);
     setView("form");
   };
 
   return (
     <div>
-      {/* 2. Conditionally render the title and Add New button */}
       {view === "list" && (
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-2xl font-bold">Categories</h1>
@@ -75,7 +89,7 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      {/* 3. Conditionally render the form view */}
+      {/* This is the corrected block with the full JSX */}
       {view === "form" && (
         <div>
           <button
@@ -96,19 +110,33 @@ export default function CategoriesPage() {
         </div>
       )}
 
-      {/* 4. Conditionally render the list view */}
       {view === "list" && (
         <div className="p-6 bg-white rounded-lg shadow-md">
-          <div className="space-y-4">
-            {paginatedCategories.map((cat) => (
-              <CategoryListItem
-                key={cat._id}
-                category={cat}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search categories..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-4 py-2 border rounded-md"
+            />
           </div>
+
+          <div className="space-y-4">
+            {paginatedCategories.length > 0 ? (
+              paginatedCategories.map((cat) => (
+                <CategoryListItem
+                  key={cat._id}
+                  category={cat}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))
+            ) : (
+              <p className="text-gray-500">No categories found.</p>
+            )}
+          </div>
+
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}
