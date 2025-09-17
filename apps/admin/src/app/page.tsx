@@ -47,27 +47,33 @@ export default function LoginPage() {
   return (
     <div className="flex items-center justify-center min-h-screen bg-gray-100">
       <div className="p-8 bg-white rounded-lg shadow-md w-96">
-        <h1 className="mb-6 text-2xl font-bold text-center">Admin Login</h1>
+        <h1 className="mb-6 text-2xl font-bold text-center text-gray-800">
+          Admin Login
+        </h1>
 
         {step === "credentials" && (
           <form onSubmit={handleLogin}>
             <div className="mb-4">
-              <label className="block mb-2 text-sm font-medium">Username</label>
+              <label className="block mb-2 text-sm font-medium text-gray-800">
+                Username
+              </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md border-blue-700 text-gray-600"
                 required
               />
             </div>
             <div className="mb-6">
-              <label className="block mb-2 text-sm font-medium">Password</label>
+              <label className="block mb-2 text-sm font-medium text-gray-800">
+                Password
+              </label>
               <input
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-3 py-2 border rounded-md"
+                className="w-full px-3 py-2 border rounded-md border-blue-700 text-gray-600"
                 required
               />
             </div>
