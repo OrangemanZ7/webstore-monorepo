@@ -36,6 +36,12 @@ export default function DashboardPage() {
         >
           Go to Security Settings (2FA Setup)
         </Link>
+        <Link
+          href="/dashboard/categories"
+          className="block text-blue-600 hover:underline"
+        >
+          Manage Categories
+        </Link>
       </div>
 
       <button
