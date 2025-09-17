@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { IProduct } from "@/types";
 import ProductForm from "@/components/ProductForm";
 import Pagination from "@/components/Pagination";
+import ProductListItem from "@/components/ProductListItem";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -91,32 +92,14 @@ export default function ProductsPage() {
         <div className="p-6 bg-white rounded-lg shadow-md">
           <div className="space-y-4">
             {paginatedProducts.map((product) => (
-              <div key={product._id} className="p-4 border rounded-md">
-                <h3 className="font-bold">{product.name}</h3>
-                <p className="text-sm text-gray-800">
-                  {product.category.name} &gt; {product.subCategorySlug}
-                </p>
-                <p className="text-lg font-semibold">${product.price}</p>
-                <p className="text-sm">Stock: {product.stockQuantity}</p>
-                <div className="mt-3 space-x-2">
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="px-3 py-1 text-sm text-white bg-blue-500 rounded"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(product._id)}
-                    className="px-3 py-1 text-sm text-white bg-red-500 rounded"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
+              <ProductListItem
+                key={product._id}
+                product={product}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
-
-          {/* 6. Add the Pagination component */}
           <Pagination
             currentPage={currentPage}
             totalPages={totalPages}

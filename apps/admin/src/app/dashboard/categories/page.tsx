@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/authStore";
 import { ICategory } from "@/types";
 import CategoryForm from "@/components/categoryForm";
 import Pagination from "@/components/Pagination";
+import CategoryListItem from "@/components/CategoryListItem";
 
 const ITEMS_PER_PAGE = 5;
 
@@ -100,35 +101,12 @@ export default function CategoriesPage() {
         <div className="p-6 bg-white rounded-lg shadow-md">
           <div className="space-y-4">
             {paginatedCategories.map((cat) => (
-              <div
+              <CategoryListItem
                 key={cat._id}
-                className="p-4 border rounded-md flex justify-between items-center"
-              >
-                <div>
-                  <h3 className="font-bold">{cat.name}</h3>
-                  <ul className="pl-4 mt-2 list-disc">
-                    {cat.subCategories.map((sub, index) => (
-                      <li key={index} className="text-sm text-gray-600">
-                        {sub.name}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-                <div className="space-x-2">
-                  <button
-                    onClick={() => handleEdit(cat)}
-                    className="px-3 py-1 text-sm text-white bg-blue-500 rounded"
-                  >
-                    Edit
-                  </button>
-                  <button
-                    onClick={() => handleDelete(cat._id)}
-                    className="px-3 py-1 text-sm text-white bg-red-500 rounded"
-                  >
-                    Delete
-                  </button>
-                </div>
-              </div>
+                category={cat}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
           <Pagination
