@@ -40,9 +40,9 @@ export default function CategoriesPage() {
     <div className="p-8">
       <h1 className="mb-6 text-2xl font-bold">Manage Categories</h1>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-3 text-gray-800">
         <div className="p-6 bg-white rounded-lg shadow-md md:col-span-1">
-          <h2 className="mb-4 text-xl font-semibold">
+          <h2 className="mb-4 text-xl font-semibold text-blue-800">
             {editingCategory ? "Edit Category" : "Add New Category"}
           </h2>
           <CategoryForm
@@ -51,7 +51,7 @@ export default function CategoriesPage() {
           />
         </div>
 
-        <div className="p-6 bg-white rounded-lg shadow-md md:col-span-2">
+        <div className="p-6 bg-white rounded-lg shadow-md md:col-span-2 text-gray-800">
           <h2 className="mb-4 text-xl font-semibold">Existing Categories</h2>
           <div className="space-y-4">
             {(categories as ICategory[]).length > 0 ? (
