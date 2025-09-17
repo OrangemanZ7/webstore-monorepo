@@ -1,11 +1,9 @@
 import dbConnect from "@/lib/dbConnect";
 import Product from "@/models/Product";
 import type { NextApiRequest, NextApiResponse } from "next";
+import auth from "@/middleware/auth"; // Import the auth middleware
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const handler = async (req: any, res: NextApiResponse) => {
   const { method } = req;
 
   await dbConnect();
@@ -13,8 +11,6 @@ export default async function handler(
   switch (method) {
     case "GET":
       try {
-        // We use .populate('category') to replace the category ID
-        // with the full category document.
         const products = await Product.find({}).populate("category");
         res.status(200).json({ success: true, data: products });
       } catch (error) {
@@ -36,4 +32,7 @@ export default async function handler(
       res.status(405).end(`Method ${method} Not Allowed`);
       break;
   }
-}
+};
+
+// Wrap the entire handler with the auth middleware
+export default auth(handler);

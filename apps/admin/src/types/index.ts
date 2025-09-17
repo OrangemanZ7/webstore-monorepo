@@ -11,3 +11,15 @@ export interface ICategory {
   slug: string;
   subCategories: ISubCategory[];
 }
+
+export interface IProduct {
+  _id: string;
+  name: string;
+  description: string;
+  price: number;
+  sku: string;
+  stockQuantity: number;
+  images: string[];
+  category: ICategory; // Use the existing ICategory type
+  subCategorySlug: string;
+}

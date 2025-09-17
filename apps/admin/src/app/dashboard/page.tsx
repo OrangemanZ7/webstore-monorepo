@@ -42,6 +42,12 @@ export default function DashboardPage() {
         >
           Manage Categories
         </Link>
+        <Link
+          href="/dashboard/products"
+          className="block text-blue-600 hover:underline"
+        >
+          Manage Products
+        </Link>
       </div>
 
       <button
