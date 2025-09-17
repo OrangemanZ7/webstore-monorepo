@@ -10,6 +10,10 @@ type Handler = (req: AuthenticatedRequest, res: NextApiResponse) => void;
 
 const auth = (handler: Handler) => {
   return async (req: AuthenticatedRequest, res: NextApiResponse) => {
+    if (req.method === "OPTIONS") {
+      return res.status(200).end();
+    }
+
     try {
       const authHeader = req.headers.authorization;
       if (!authHeader || !authHeader.startsWith("Bearer ")) {
@@ -24,7 +28,7 @@ const auth = (handler: Handler) => {
         process.env.JWT_SECRET || "your-default-secret"
       ) as { adminId: string; username: string };
 
-      req.admin = decoded; // Attach admin info to the request object
+      req.admin = decoded;
       return handler(req, res);
     } catch (error) {
       return res.status(401).json({ message: "Invalid or expired token" });

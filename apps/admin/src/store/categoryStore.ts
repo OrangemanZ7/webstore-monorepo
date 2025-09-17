@@ -4,7 +4,7 @@ import { ICategory } from "@/types";
 
 interface CategoryState {
   categories: ICategory[];
-  fetchCategories: () => Promise<void>;
+  fetchCategories: (authToken: string) => Promise<void>;
   addCategory: (categoryData: any, authToken: string) => Promise<void>;
   updateCategory: (
     id: string,
@@ -18,10 +18,13 @@ const API_URL = "http://localhost:3001/api";
 
 export const useCategoryStore = create<CategoryState>((set, get) => ({
   categories: [],
-  fetchCategories: async () => {
+  fetchCategories: async (authToken) => {
     try {
       const response = await axios.get<{ data: ICategory[] }>(
-        `${API_URL}/categories`
+        `${API_URL}/categories`,
+        {
+          headers: { Authorization: `Bearer ${authToken}` },
+        }
       );
       set({ categories: response.data.data });
     } catch (error) {
@@ -33,7 +36,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       await axios.post(`${API_URL}/categories`, categoryData, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      await get().fetchCategories();
+      await get().fetchCategories(authToken);
     } catch (error) {
       console.error("Failed to add category:", error);
       throw error;
@@ -44,7 +47,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       await axios.put(`${API_URL}/categories/${id}`, categoryData, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      await get().fetchCategories(); // Refresh list on success
+      await get().fetchCategories(authToken);
     } catch (error) {
       console.error("Failed to update category:", error);
       throw error;
@@ -55,7 +58,7 @@ export const useCategoryStore = create<CategoryState>((set, get) => ({
       await axios.delete(`${API_URL}/categories/${id}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      await get().fetchCategories(); // Refresh list on success
+      await get().fetchCategories(authToken);
     } catch (error) {
       console.error("Failed to delete category:", error);
       throw error;

@@ -8,7 +8,6 @@ import { ICategory } from "@/types";
 import CategoryForm from "@/components/categoryForm";
 
 export default function CategoriesPage() {
-  // Add deleteCategory here
   const { categories, fetchCategories, deleteCategory } = useCategoryStore();
   const { isAuthenticated, token: authToken } = useAuthStore();
   const router = useRouter();
@@ -20,10 +19,10 @@ export default function CategoriesPage() {
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/");
-    } else {
-      fetchCategories();
+    } else if (authToken) {
+      fetchCategories(authToken);
     }
-  }, [isAuthenticated, router, fetchCategories]);
+  }, [isAuthenticated, router, authToken, fetchCategories]);
 
   const handleDelete = (id: string) => {
     if (window.confirm("Are you sure you want to delete this category?")) {
@@ -40,9 +39,9 @@ export default function CategoriesPage() {
     <div className="p-8">
       <h1 className="mb-6 text-2xl font-bold">Manage Categories</h1>
 
-      <div className="grid grid-cols-1 gap-8 md:grid-cols-3 text-gray-800">
+      <div className="grid grid-cols-1 gap-8 md:grid-cols-3">
         <div className="p-6 bg-white rounded-lg shadow-md md:col-span-1">
-          <h2 className="mb-4 text-xl font-semibold text-blue-800">
+          <h2 className="mb-4 text-xl font-semibold">
             {editingCategory ? "Edit Category" : "Add New Category"}
           </h2>
           <CategoryForm
@@ -51,7 +50,7 @@ export default function CategoriesPage() {
           />
         </div>
 
-        <div className="p-6 bg-white rounded-lg shadow-md md:col-span-2 text-gray-800">
+        <div className="p-6 bg-white rounded-lg shadow-md md:col-span-2">
           <h2 className="mb-4 text-xl font-semibold">Existing Categories</h2>
           <div className="space-y-4">
             {(categories as ICategory[]).length > 0 ? (

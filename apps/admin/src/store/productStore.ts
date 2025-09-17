@@ -4,7 +4,7 @@ import { IProduct } from "@/types";
 
 interface ProductState {
   products: IProduct[];
-  fetchProducts: () => Promise<void>;
+  fetchProducts: (authToken: string) => Promise<void>;
   addProduct: (productData: any, authToken: string) => Promise<void>;
   updateProduct: (
     id: string,
@@ -18,9 +18,11 @@ const API_URL = "http://localhost:3001/api";
 
 export const useProductStore = create<ProductState>((set, get) => ({
   products: [],
-  fetchProducts: async () => {
+  fetchProducts: async (authToken) => {
     try {
-      const response = await axios.get(`${API_URL}/products`);
+      const response = await axios.get(`${API_URL}/products`, {
+        headers: { Authorization: `Bearer ${authToken}` },
+      });
       set({ products: response.data.data });
     } catch (error) {
       console.error("Failed to fetch products:", error);
@@ -31,7 +33,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       await axios.post(`${API_URL}/products`, productData, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      await get().fetchProducts();
+      await get().fetchProducts(authToken);
     } catch (error) {
       console.error("Failed to add product:", error);
       throw error;
@@ -42,7 +44,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       await axios.put(`${API_URL}/products/${id}`, productData, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      await get().fetchProducts();
+      await get().fetchProducts(authToken);
     } catch (error) {
       console.error("Failed to update product:", error);
       throw error;
@@ -53,7 +55,7 @@ export const useProductStore = create<ProductState>((set, get) => ({
       await axios.delete(`${API_URL}/products/${id}`, {
         headers: { Authorization: `Bearer ${authToken}` },
       });
-      await get().fetchProducts();
+      await get().fetchProducts(authToken);
     } catch (error) {
       console.error("Failed to delete product:", error);
       throw error;

@@ -1,12 +1,15 @@
 import dbConnect from "@/lib/dbConnect";
 import Category from "@/models/Category";
 import type { NextApiRequest, NextApiResponse } from "next";
+import auth from "@/middleware/auth";
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
+const handler = async (req: any, res: NextApiResponse) => {
   const { method } = req;
+
+  // Add this block to handle the CORS preflight request
+  if (method === "OPTIONS") {
+    return res.status(200).end();
+  }
 
   await dbConnect();
 
@@ -14,22 +17,23 @@ export default async function handler(
     case "GET":
       try {
         const categories = await Category.find({});
-        res.status(200).json({ success: true, data: categories });
+        return res.status(200).json({ success: true, data: categories });
       } catch (error) {
-        res.status(400).json({ success: false });
+        return res.status(400).json({ success: false });
       }
-      break;
+
     case "POST":
       try {
         const category = await Category.create(req.body);
-        res.status(201).json({ success: true, data: category });
+        return res.status(201).json({ success: true, data: category });
       } catch (error) {
-        res.status(400).json({ success: false });
+        return res.status(400).json({ success: false });
       }
-      break;
+
     default:
-      res.setHeader("Allow", ["GET", "POST"]);
-      res.status(405).end(`Method ${method} Not Allowed`);
-      break;
+      res.setHeader("Allow", ["GET", "POST", "OPTIONS"]);
+      return res.status(405).end(`Method ${method} Not Allowed`);
   }
-}
+};
+
+export default auth(handler);

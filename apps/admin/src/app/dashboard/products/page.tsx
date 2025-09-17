@@ -6,7 +6,6 @@ import { useAuthStore } from "@/store/authStore";
 import { useRouter } from "next/navigation";
 import { IProduct } from "@/types";
 import ProductForm from "@/components/ProductForm";
-import axios from "axios"; // Add this import
 
 export default function ProductsPage() {
   const { products, fetchProducts, deleteProduct } = useProductStore();
@@ -18,9 +17,8 @@ export default function ProductsPage() {
   useEffect(() => {
     if (!isAuthenticated) {
       router.push("/");
-    } else {
-      axios.defaults.headers.common["Authorization"] = `Bearer ${authToken}`;
-      fetchProducts();
+    } else if (authToken) {
+      fetchProducts(authToken);
     }
   }, [isAuthenticated, router, authToken, fetchProducts]);
 
