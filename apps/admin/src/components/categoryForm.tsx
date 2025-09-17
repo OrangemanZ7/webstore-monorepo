@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react";
 import { useCategoryStore } from "@/store/categoryStore";
 import { useAuthStore } from "@/store/authStore";
-// BEFORE: import { ICategory } from '@api/models/Category';
-// AFTER: Import from the new local types file
 import { ICategory } from "@/types";
 
 // Helper function to create a URL-friendly slug
@@ -33,7 +31,11 @@ export default function CategoryForm({
   useEffect(() => {
     if (categoryToEdit) {
       setName(categoryToEdit.name);
-      setSubCategories(categoryToEdit.subCategories);
+      setSubCategories(
+        categoryToEdit.subCategories.length > 0
+          ? categoryToEdit.subCategories
+          : [{ name: "", slug: "" }]
+      );
     } else {
       setName("");
       setSubCategories([{ name: "", slug: "" }]);
@@ -58,36 +60,50 @@ export default function CategoryForm({
   };
 
   const removeSubCategoryField = (index: number) => {
+    // Prevent removing the last field
+    if (subCategories.length <= 1) return;
     const updatedSubCategories = subCategories.filter((_, i) => i !== index);
     setSubCategories(updatedSubCategories);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!authToken || !categoryToEdit?._id) return; // Guard against missing auth token or id
+    // This is the corrected guard clause. It only checks for the auth token.
+    if (!authToken) {
+      console.error("Authentication token not found.");
+      return;
+    }
 
     const payload = {
       name,
       slug: generateSlug(name),
-      subCategories,
+      // Filter out any empty sub-categories before saving
+      subCategories: subCategories.filter((sub) => sub.name.trim() !== ""),
     };
 
     try {
       if (categoryToEdit) {
+        // The check for the ID happens here, only when editing
+        if (!categoryToEdit._id) {
+          console.error("Cannot update category without an ID.");
+          return;
+        }
         await updateCategory(categoryToEdit._id, payload, authToken);
       } else {
         await addCategory(payload, authToken);
       }
-      onComplete(); // Signal completion to the parent component
+      onComplete(); // Reset the form via the parent component
     } catch (error) {
-      console.error("Failed to save category");
+      console.error("Failed to save category:", error);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div>
-        <label className="block mb-1 text-sm font-medium">Category Name</label>
+        <label className="block mb-1 text-sm font-medium text-gray-800">
+          Category Name
+        </label>
         <input
           type="text"
           value={name}
@@ -98,7 +114,9 @@ export default function CategoryForm({
       </div>
 
       <div>
-        <label className="block mb-2 text-sm font-medium">Sub-categories</label>
+        <label className="block mb-2 text-sm font-medium text-gray-800">
+          Sub-categories
+        </label>
         {subCategories.map((sub, index) => (
           <div key={index} className="flex items-center gap-2 mb-2">
             <input
@@ -109,12 +127,12 @@ export default function CategoryForm({
                 handleSubCategoryChange(index, "name", e.target.value)
               }
               className="w-full px-3 py-2 border rounded-md"
-              required
             />
             <button
               type="button"
               onClick={() => removeSubCategoryField(index)}
-              className="px-2 py-1 text-white bg-red-500 rounded"
+              className="px-2 py-1 text-white bg-red-500 rounded disabled:bg-gray-300"
+              disabled={subCategories.length <= 1}
             >
               X
             </button>
