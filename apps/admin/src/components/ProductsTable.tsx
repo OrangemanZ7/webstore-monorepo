@@ -19,6 +19,7 @@ export default function ProductsTable({
             <th className="p-3">Product Name</th>
             <th className="p-3">SKU</th>
             <th className="p-3">Category</th>
+            <th className="p-3">Sub-Category</th>
             <th className="p-3">Price</th>
             <th className="p-3">Cost</th>
             <th className="p-3">Profit</th>
@@ -44,9 +45,8 @@ export default function ProductsTable({
               >
                 <td className="p-3 font-medium">{product.name}</td>
                 <td className="p-3">{product.sku}</td>
-                <td className="p-3">
-                  {product.category.name} &gt; {product.subCategorySlug}
-                </td>
+                <td className="p-3">{product.category.name}</td>
+                <td className="p-3">{product.subCategorySlug}</td>
                 <td className="p-3">${customerPrice.toFixed(2)}</td>
                 <td className="p-3">
                   ${(product.purchasePrice || 0).toFixed(2)}
