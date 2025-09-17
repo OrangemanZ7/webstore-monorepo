@@ -17,6 +17,7 @@ export interface IProduct {
   name: string;
   description: string;
   price: number;
+  purchasePrice: number;
   sku: string;
   stockQuantity: number;
   images: string[];

@@ -15,6 +15,7 @@ interface IFormData {
   name: string;
   description: string;
   price: number;
+  purchasePrice: number;
   sku: string;
   stockQuantity: number;
   images: string[];
@@ -26,6 +27,7 @@ const initialState: IFormData = {
   name: "",
   description: "",
   price: 0,
+  purchasePrice: 0,
   sku: "",
   stockQuantity: 0,
   images: [],
@@ -56,6 +58,7 @@ export default function ProductForm({
         name: productToEdit.name,
         description: productToEdit.description,
         price: productToEdit.price,
+        purchasePrice: productToEdit.purchasePrice,
         sku: productToEdit.sku,
         stockQuantity: productToEdit.stockQuantity,
         images: productToEdit.images,
@@ -141,7 +144,21 @@ export default function ProductForm({
       <div className="flex gap-4">
         <div className="flex-1">
           <label className="block mb-1 text-sm font-medium text-gray-800">
-            Price
+            Purchase Price
+          </label>
+          <input
+            type="number"
+            step="0.01"
+            name="purchasePrice"
+            value={formData.purchasePrice}
+            onChange={handleChange}
+            className="w-full px-3 py-2 border rounded-md"
+            required
+          />
+        </div>
+        <div className="flex-1">
+          <label className="block mb-1 text-sm font-medium text-gray-800">
+            Customer Price
           </label>
           <input
             type="number"
@@ -153,19 +170,19 @@ export default function ProductForm({
             required
           />
         </div>
-        <div className="flex-1">
-          <label className="block mb-1 text-sm font-medium text-gray-800">
-            Stock
-          </label>
-          <input
-            type="number"
-            name="stockQuantity"
-            value={formData.stockQuantity}
-            onChange={handleChange}
-            className="w-full px-3 py-2 border rounded-md"
-            required
-          />
-        </div>
+      </div>
+      <div className="flex-1">
+        <label className="block mb-1 text-sm font-medium text-gray-800">
+          Stock
+        </label>
+        <input
+          type="number"
+          name="stockQuantity"
+          value={formData.stockQuantity}
+          onChange={handleChange}
+          className="w-full px-3 py-2 border rounded-md"
+          required
+        />
       </div>
 
       {/* Category and Sub-category */}
