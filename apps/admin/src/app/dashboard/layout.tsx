@@ -34,8 +34,8 @@ export default function DashboardLayout({
   // 4. If authenticated, render the full layout and page content
   return (
     <section className="flex h-screen bg-gray-100">
-      <aside className="w-64 flex flex-col p-4 bg-gray-800 text-white">
-        <h1 className="text-2xl font-bold mb-8">Admin Panel</h1>
+      <aside className="w-64 flex flex-col p-4 bg-gray-800">
+        <h1 className="text-2xl font-bold mb-8 text-white">Admin Panel</h1>
         <nav className="flex flex-col space-y-2">
           <Link
             href="/dashboard"
@@ -63,7 +63,7 @@ export default function DashboardLayout({
           </Link>
         </nav>
 
-        <div className="mt-auto">
+        <div className="mt-auto mb-20">
           <LogoutButton />
         </div>
       </aside>
