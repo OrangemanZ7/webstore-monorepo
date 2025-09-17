@@ -8,7 +8,7 @@ import { useAuthStore } from "@/store/authStore";
 
 interface ProductFormProps {
   productToEdit: IProduct | null;
-  onComplete: () => void;
+  onComplete: () => void; // Used for save, update, delete, cancel
 }
 
 interface IFormData {
@@ -41,12 +41,10 @@ export default function ProductForm({
 }: ProductFormProps) {
   const [formData, setFormData] = useState<IFormData>(initialState);
   const { categories, fetchCategories } = useCategoryStore();
-  const { addProduct, updateProduct } = useProductStore();
+  const { addProduct, updateProduct, deleteProduct } = useProductStore();
   const { token: authToken } = useAuthStore();
 
-  // This is the corrected useEffect block
   useEffect(() => {
-    // Only fetch categories if the authToken is available
     if (authToken) {
       fetchCategories(authToken);
     }
@@ -58,7 +56,7 @@ export default function ProductForm({
         name: productToEdit.name,
         description: productToEdit.description,
         price: productToEdit.price,
-        purchasePrice: productToEdit.purchasePrice,
+        purchasePrice: productToEdit.purchasePrice || 0,
         sku: productToEdit.sku,
         stockQuantity: productToEdit.stockQuantity,
         images: productToEdit.images,
@@ -77,7 +75,7 @@ export default function ProductForm({
   ) => {
     const { name, value } = e.target;
     const processedValue =
-      name === "price" || name === "stockQuantity"
+      name === "price" || name === "purchasePrice" || name === "stockQuantity"
         ? parseFloat(value) || 0
         : value;
     setFormData((prev) => ({ ...prev, [name]: processedValue }));
@@ -99,11 +97,30 @@ export default function ProductForm({
     }
   };
 
+  const handleDelete = async () => {
+    if (
+      productToEdit &&
+      window.confirm(
+        "Are you sure you want to permanently delete this product?"
+      )
+    ) {
+      if (!authToken) return;
+      try {
+        await deleteProduct(productToEdit._id, authToken);
+        onComplete();
+      } catch (error) {
+        console.error("Failed to delete product", error);
+      }
+    }
+  };
+
   const selectedCategory = categories.find((c) => c._id === formData.category);
+
+  const profit = formData.price - formData.purchasePrice;
+  const margin = formData.price > 0 ? (profit / formData.price) * 100 : 0;
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {/* Name, SKU, Description */}
       <div>
         <label className="block mb-1 text-sm font-medium text-gray-800">
           Product Name
@@ -140,7 +157,6 @@ export default function ProductForm({
         />
       </div>
 
-      {/* Price and Stock */}
       <div className="flex gap-4">
         <div className="flex-1">
           <label className="block mb-1 text-sm font-medium text-gray-800">
@@ -185,7 +201,6 @@ export default function ProductForm({
         />
       </div>
 
-      {/* Category and Sub-category */}
       <div className="flex gap-4">
         <div className="flex-1">
           <label className="block mb-1 text-sm font-medium text-gray-800">
@@ -227,22 +242,54 @@ export default function ProductForm({
           </select>
         </div>
       </div>
-
-      <button
-        type="submit"
-        className="w-full py-2 text-white bg-green-600 rounded-md"
-      >
-        {productToEdit ? "Update Product" : "Save Product"}
-      </button>
       {productToEdit && (
+        <div className="p-3 mt-4 bg-gray-50 rounded-md border text-sm">
+          <h3 className="font-semibold mb-2 text-gray-700">Profit Analysis</h3>
+          <div className="grid grid-cols-2 gap-x-4">
+            <span className="text-gray-600">Profit per Unit:</span>
+            <span
+              className={`font-medium ${
+                profit > 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              ${profit.toFixed(2)}
+            </span>
+            <span className="text-gray-600">Profit Margin:</span>
+            <span
+              className={`font-medium ${
+                margin > 0 ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {margin.toFixed(1)}%
+            </span>
+          </div>
+        </div>
+      )}
+
+      <div className="flex flex-wrap gap-2 pt-4">
+        <button
+          type="submit"
+          className="flex-1 px-4 py-2 text-white bg-green-600 rounded-md"
+        >
+          {productToEdit ? "Update Product" : "Save Product"}
+        </button>
         <button
           type="button"
           onClick={onComplete}
-          className="w-full py-2 mt-2 bg-gray-200 rounded-md"
+          className="flex-1 px-4 py-2 bg-gray-200 rounded-md"
         >
-          Cancel Edit
+          Cancel
         </button>
-      )}
+        {productToEdit && (
+          <button
+            type="button"
+            onClick={handleDelete}
+            className="w-full px-4 py-2 mt-2 text-white bg-red-600 rounded-md"
+          >
+            Delete Product
+          </button>
+        )}
+      </div>
     </form>
   );
 }

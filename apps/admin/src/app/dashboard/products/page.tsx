@@ -6,9 +6,9 @@ import { useAuthStore } from "@/store/authStore";
 import { IProduct } from "@/types";
 import ProductForm from "@/components/ProductForm";
 import Pagination from "@/components/Pagination";
-import ProductListItem from "@/components/ProductListItem";
+import ProductsTable from "@/components/ProductsTable";
 
-const ITEMS_PER_PAGE = 5;
+const ITEMS_PER_PAGE = 10;
 
 export default function ProductsPage() {
   const [view, setView] = useState<"list" | "form">("list");
@@ -16,7 +16,7 @@ export default function ProductsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { products, fetchProducts, deleteProduct } = useProductStore();
+  const { products, fetchProducts } = useProductStore();
   const authToken = useAuthStore((state) => state.token);
 
   useEffect(() => {
@@ -27,14 +27,12 @@ export default function ProductsPage() {
 
   const filteredProducts = useMemo(() => {
     if (!searchTerm) return products;
-
     const term = searchTerm.toLowerCase();
-
-    return products.filter((product) => {
-      const nameMatch = product.name.toLowerCase().includes(term);
-      const skuMatch = product.sku.toLowerCase().includes(term);
-      return nameMatch || skuMatch;
-    });
+    return products.filter(
+      (product) =>
+        product.name.toLowerCase().includes(term) ||
+        product.sku.toLowerCase().includes(term)
+    );
   }, [products, searchTerm]);
 
   const paginatedProducts = useMemo(() => {
@@ -48,13 +46,6 @@ export default function ProductsPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
-
-  const handleDelete = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this product?")) {
-      if (!authToken) return;
-      deleteProduct(id, authToken);
-    }
-  };
 
   const handleFormComplete = () => {
     setEditingProduct(null);
@@ -88,12 +79,12 @@ export default function ProductsPage() {
       {view === "form" && (
         <div>
           <button
-            onClick={() => setView("list")}
+            onClick={handleFormComplete}
             className="mb-6 text-blue-600 hover:underline"
           >
             &larr; Back to Products List
           </button>
-          <div className="p-6 bg-white rounded-lg shadow-md">
+          <div className="p-6 bg-white rounded-lg shadow-md max-w-2xl mx-auto">
             <h2 className="mb-4 text-xl font-semibold">
               {editingProduct ? "Edit Product" : "Add New Product"}
             </h2>
@@ -110,26 +101,14 @@ export default function ProductsPage() {
           <div className="mb-4">
             <input
               type="text"
-              placeholder="Search products..."
+              placeholder="Search by product name or SKU..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border rounded-md"
             />
           </div>
-          <div className="space-y-4">
-            {paginatedProducts.length > 0 ? (
-              paginatedProducts.map((product) => (
-                <ProductListItem
-                  key={product._id}
-                  product={product}
-                  onEdit={handleEdit}
-                  onDelete={handleDelete}
-                />
-              ))
-            ) : (
-              <p className="text-gray-500">No products found.</p>
-            )}
-          </div>
+
+          <ProductsTable products={paginatedProducts} onRowClick={handleEdit} />
 
           <Pagination
             currentPage={currentPage}
