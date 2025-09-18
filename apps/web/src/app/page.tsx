@@ -84,14 +84,18 @@ export default async function HomePage() {
         <h2 className="text-3xl font-bold mb-6">Our Products</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {products.map((product) => (
-            <div key={product._id} className="border rounded-lg p-4">
-              <div className="bg-gray-200 h-48 w-full rounded-md mb-4"></div>{" "}
-              {/* Image Placeholder */}
+            // Wrap the product card in an anchor tag
+            <a
+              href={`/products/${product._id}`}
+              key={product._id}
+              className="border rounded-lg p-4 block hover:shadow-lg transition-shadow"
+            >
+              <div className="bg-gray-200 h-48 w-full rounded-md mb-4"></div>
               <h3 className="font-semibold">{product.name}</h3>
               <p className="text-lg font-bold mt-2">
                 ${product.price.toFixed(2)}
               </p>
-            </div>
+            </a>
           ))}
         </div>
       </main>
