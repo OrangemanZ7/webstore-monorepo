@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo } from "react";
 import { useProductStore } from "@/store/productStore";
 import { useAuthStore } from "@/store/authStore";
+import { useCategoryStore } from "@/store/categoryStore"; // 1. Import the category store
 import { IProduct } from "@/types";
 import ProductForm from "@/components/ProductForm";
 import Pagination from "@/components/Pagination";
@@ -15,25 +16,42 @@ export default function ProductsPage() {
   const [editingProduct, setEditingProduct] = useState<IProduct | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState(""); // 2. Add state for category filter
 
   const { products, fetchProducts } = useProductStore();
+  const { categories, fetchCategories } = useCategoryStore(); // Get categories
   const authToken = useAuthStore((state) => state.token);
 
   useEffect(() => {
     if (authToken) {
       fetchProducts(authToken);
+      fetchCategories(authToken); // Fetch categories for the filter dropdown
     }
-  }, [authToken, fetchProducts]);
+  }, [authToken, fetchProducts, fetchCategories]);
 
+  // 3. Update filtering logic to handle both search and category filter
   const filteredProducts = useMemo(() => {
-    if (!searchTerm) return products;
-    const term = searchTerm.toLowerCase();
-    return products.filter(
-      (product) =>
-        product.name.toLowerCase().includes(term) ||
-        product.sku.toLowerCase().includes(term)
-    );
-  }, [products, searchTerm]);
+    let filtered = [...products];
+
+    // Filter by selected category first
+    if (selectedCategory) {
+      filtered = filtered.filter(
+        (product) => product.category._id === selectedCategory
+      );
+    }
+
+    // Then filter by search term
+    if (searchTerm) {
+      const term = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (product) =>
+          product.name.toLowerCase().includes(term) ||
+          product.sku.toLowerCase().includes(term)
+      );
+    }
+
+    return filtered;
+  }, [products, searchTerm, selectedCategory]);
 
   const paginatedProducts = useMemo(() => {
     const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
@@ -43,9 +61,10 @@ export default function ProductsPage() {
 
   const totalPages = Math.ceil(filteredProducts.length / ITEMS_PER_PAGE);
 
+  // 4. Reset pagination when either filter changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, selectedCategory]);
 
   const handleFormComplete = () => {
     setEditingProduct(null);
@@ -98,14 +117,27 @@ export default function ProductsPage() {
 
       {view === "list" && (
         <div className="p-6 bg-white rounded-lg shadow-md">
-          <div className="mb-4">
+          {/* 5. Add the filter controls */}
+          <div className="flex gap-4 mb-4">
             <input
               type="text"
-              placeholder="Search by product name or SKU..."
+              placeholder="Search by name or SKU..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="w-full px-4 py-2 border rounded-md"
             />
+            <select
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+              className="px-4 py-2 border rounded-md"
+            >
+              <option value="">All Categories</option>
+              {categories.map((cat) => (
+                <option key={cat._id} value={cat._id}>
+                  {cat.name}
+                </option>
+              ))}
+            </select>
           </div>
 
           <ProductsTable products={paginatedProducts} onRowClick={handleEdit} />
